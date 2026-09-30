@@ -5,9 +5,12 @@ import '../../services/api_service.dart';
 import '../../widgets/movie_card.dart';
 import '../../widgets/bottom_nav.dart';
 import '../movie/movie_detail.dart';
+import '../../models/booking_model.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, this.embedded = false, this.onTicketPreview});
+  final bool embedded;
+  final ValueChanged<BookingModel>? onTicketPreview;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -17,6 +20,7 @@ enum _HomeTab { nowPlaying, upcoming }
 
 class _HomePageState extends State<HomePage> {
   final _api = ApiService();
+  final _scrollController = ScrollController();
   _HomeTab _tab = _HomeTab.nowPlaying;
 
   // เก็บ future แยกกัน จะได้ไม่ต้องยิง API ซ้ำทุกครั้งที่สลับแท็บ
@@ -30,6 +34,12 @@ class _HomePageState extends State<HomePage> {
     _upcomingFuture = _api.getUpcoming();
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   Future<void> _refresh() async {
     setState(() {
       _nowPlayingFuture = _api.getNowPlaying();
@@ -41,64 +51,92 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final isTablet = Responsive.isTablet(context);
-    final activeFuture =
-        _tab == _HomeTab.nowPlaying ? _nowPlayingFuture : _upcomingFuture;
+    final activeFuture = _tab == _HomeTab.nowPlaying
+        ? _nowPlayingFuture
+        : _upcomingFuture;
 
-    final body = RefreshIndicator(
-      onRefresh: _refresh,
-      child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(child: _buildHeader()),
-          SliverToBoxAdapter(child: _buildTabs()),
-          SliverToBoxAdapter(child: _buildHero()),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-            sliver: FutureBuilder<List<MovieModel>>(
-              future: activeFuture,
-              builder: (context, snap) {
-                if (snap.connectionState == ConnectionState.waiting) {
-                  return const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                if (snap.hasError) {
-                  return SliverFillRemaining(
-                    child: _ErrorState(onRetry: _refresh),
-                  );
-                }
-                final movies = snap.data ?? [];
-                if (movies.isEmpty) {
-                  return const SliverFillRemaining(child: _EmptyState());
-                }
-                return SliverGrid(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: Responsive.gridColumns(context),
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.55,
+    final body = Scrollbar(
+      controller: _scrollController,
+      thumbVisibility: true,
+      trackVisibility: true,
+      interactive: true,
+      thickness: 6,
+      radius: const Radius.circular(8),
+      child: RefreshIndicator(
+        onRefresh: _refresh,
+        child: CustomScrollView(
+          key: const PageStorageKey('home-movies'),
+          controller: _scrollController,
+          primary: false,
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          slivers: [
+            SliverToBoxAdapter(child: _buildHeader()),
+            if (ApiService.isDemo)
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    'ข้อมูลตัวอย่าง • ยังไม่ได้ตั้งค่า TMDB API',
+                    style: TextStyle(color: AppColors.accent),
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, i) => MovieCard(
-                      movie: movies[i],
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => MovieDetailScreen(movieId: movies[i].id),
+                ),
+              ),
+            SliverToBoxAdapter(child: _buildTabs()),
+            SliverToBoxAdapter(child: _buildHero()),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              sliver: FutureBuilder<List<MovieModel>>(
+                future: activeFuture,
+                builder: (context, snap) {
+                  if (snap.connectionState == ConnectionState.waiting) {
+                    return const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (snap.hasError) {
+                    return SliverFillRemaining(
+                      child: _ErrorState(onRetry: _refresh),
+                    );
+                  }
+                  final movies = snap.data ?? [];
+                  if (movies.isEmpty) {
+                    return const SliverFillRemaining(child: _EmptyState());
+                  }
+                  return SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: Responsive.gridColumns(context),
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 0.55,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, i) => MovieCard(
+                        movie: movies[i],
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MovieDetailScreen(
+                              movieId: movies[i].id,
+                              onTicketPreview: widget.onTicketPreview,
+                            ),
+                          ),
                         ),
                       ),
+                      childCount: movies.length,
                     ),
-                    childCount: movies.length,
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
 
     // แท็บเล็ต: มี side nav แทน bottom nav (ตาม mockup)
-    if (isTablet) {
+    if (isTablet && !widget.embedded) {
       return Scaffold(
         body: Row(
           children: [
@@ -111,11 +149,14 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       body: SafeArea(child: body),
-      bottomNavigationBar: AppBottomNav(currentIndex: 0, onTap: (_) {}),
+      bottomNavigationBar: widget.embedded
+          ? null
+          : AppBottomNav(currentIndex: 0, onTap: (_) {}),
     );
   }
 
   Widget _buildHeader() {
+    final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
@@ -123,13 +164,19 @@ class _HomePageState extends State<HomePage> {
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text('สวัสดี,', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
-              Text('เม่ย 👋',
-                  style: TextStyle(
-                      color: AppColors.textMain,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600)),
+            children: [
+              Text(
+                'สวัสดี,',
+                style: TextStyle(color: colors.onSurfaceVariant, fontSize: 13),
+              ),
+              Text(
+                'เม่ย 👋',
+                style: TextStyle(
+                  color: colors.onSurface,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
           const CircleAvatar(
@@ -143,12 +190,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildTabs() {
+    final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: AppColors.surface1,
+          color: colors.surfaceContainer,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -163,6 +211,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _tabButton(String label, _HomeTab tab) {
     final active = _tab == tab;
+    final colors = Theme.of(context).colorScheme;
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _tab = tab),
@@ -177,7 +226,7 @@ class _HomePageState extends State<HomePage> {
           child: Text(
             label,
             style: TextStyle(
-              color: active ? Colors.white : AppColors.textMuted,
+              color: active ? Colors.white : colors.onSurfaceVariant,
               fontWeight: active ? FontWeight.w600 : FontWeight.w400,
               fontSize: 14,
             ),
@@ -206,14 +255,20 @@ class _HomePageState extends State<HomePage> {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF5A189A), AppColors.primary, AppColors.accent],
+                colors: [
+                  Color(0xFF5A189A),
+                  AppColors.primary,
+                  AppColors.accent,
+                ],
               ),
               image: first.backdropPath != null
                   ? DecorationImage(
                       image: NetworkImage(first.backdropUrl()),
                       fit: BoxFit.cover,
                       colorFilter: ColorFilter.mode(
-                          Colors.black.withOpacity(0.35), BlendMode.darken),
+                        Colors.black.withValues(alpha: 0.35),
+                        BlendMode.darken,
+                      ),
                     )
                   : null,
             ),
@@ -222,11 +277,18 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(first.title,
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-                Text('⭐ ${first.voteAverage.toStringAsFixed(1)} · ${first.year}',
-                    style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                Text(
+                  first.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  '⭐ ${first.voteAverage.toStringAsFixed(1)} · ${first.year}',
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -244,7 +306,11 @@ class _TabletSideNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const items = ['หน้าหลัก', 'ตั๋วของฉัน', 'โปรไฟล์'];
-    const icons = [Icons.home_rounded, Icons.confirmation_number_rounded, Icons.person_rounded];
+    const icons = [
+      Icons.home_rounded,
+      Icons.confirmation_number_rounded,
+      Icons.person_rounded,
+    ];
     return Container(
       width: 220,
       color: AppColors.surface1,
@@ -256,8 +322,14 @@ class _TabletSideNav extends StatelessWidget {
             text: const TextSpan(
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
               children: [
-                TextSpan(text: 'Cine', style: TextStyle(color: AppColors.textMain)),
-                TextSpan(text: 'Go', style: TextStyle(color: AppColors.primary)),
+                TextSpan(
+                  text: 'Cine',
+                  style: TextStyle(color: AppColors.textMain),
+                ),
+                TextSpan(
+                  text: 'Go',
+                  style: TextStyle(color: AppColors.primary),
+                ),
               ],
             ),
           ),
@@ -266,29 +338,39 @@ class _TabletSideNav extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Material(
-                color: i == currentIndex ? AppColors.surface2 : Colors.transparent,
+                color: i == currentIndex
+                    ? AppColors.surface2
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
                   onTap: () => onTap(i),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
                     child: Row(
                       children: [
-                        Icon(icons[i],
-                            size: 18,
+                        Icon(
+                          icons[i],
+                          size: 18,
+                          color: i == currentIndex
+                              ? AppColors.primary
+                              : AppColors.textMuted,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          items[i],
+                          style: TextStyle(
                             color: i == currentIndex
                                 ? AppColors.primary
-                                : AppColors.textMuted),
-                        const SizedBox(width: 10),
-                        Text(items[i],
-                            style: TextStyle(
-                              color: i == currentIndex
-                                  ? AppColors.primary
-                                  : AppColors.textMuted,
-                              fontWeight:
-                                  i == currentIndex ? FontWeight.w600 : FontWeight.w400,
-                            )),
+                                : AppColors.textMuted,
+                            fontWeight: i == currentIndex
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -309,9 +391,16 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: const [
-          Icon(Icons.movie_filter_outlined, size: 40, color: AppColors.textMuted),
+          Icon(
+            Icons.movie_filter_outlined,
+            size: 40,
+            color: AppColors.textMuted,
+          ),
           SizedBox(height: 8),
-          Text('ยังไม่มีหนังในหมวดนี้', style: TextStyle(color: AppColors.textMuted)),
+          Text(
+            'ยังไม่มีหนังในหมวดนี้',
+            style: TextStyle(color: AppColors.textMuted),
+          ),
         ],
       ),
     );
@@ -327,10 +416,16 @@ class _ErrorState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.wifi_off_rounded, size: 40, color: AppColors.textMuted),
+          const Icon(
+            Icons.wifi_off_rounded,
+            size: 40,
+            color: AppColors.textMuted,
+          ),
           const SizedBox(height: 8),
-          const Text('โหลดข้อมูลไม่สำเร็จ ลองใหม่อีกครั้ง',
-              style: TextStyle(color: AppColors.textMuted)),
+          const Text(
+            'โหลดข้อมูลไม่สำเร็จ ลองใหม่อีกครั้ง',
+            style: TextStyle(color: AppColors.textMuted),
+          ),
           const SizedBox(height: 12),
           TextButton(onPressed: onRetry, child: const Text('ลองใหม่')),
         ],

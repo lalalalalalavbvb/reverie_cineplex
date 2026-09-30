@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
-import '../models/movie_model.dart';
+import 'package:reverie_cineplex/models/movie_model.dart';
 
 /// การ์ดโปสเตอร์หนัง ใช้ทั้งใน Home grid และหน้าอื่นๆ
 /// สัดส่วน 2:3 คงที่ ไม่ว่าจะอยู่ใน grid กี่คอลัมน์ก็ตาม (responsive)

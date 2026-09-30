@@ -12,6 +12,7 @@ class MovieCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -22,21 +23,21 @@ class MovieCard extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(14),
               child: movie.posterPath == null
-                  ? Container(color: AppColors.surface2)
+                  ? Container(color: colors.surfaceContainerHighest)
                   : Image.network(
                       movie.posterUrl(),
                       fit: BoxFit.cover,
                       loadingBuilder: (ctx, child, progress) {
                         if (progress == null) return child;
                         return Container(
-                          color: AppColors.surface2,
+                          color: colors.surfaceContainerHighest,
                           child: const Center(
                             child: CircularProgressIndicator(strokeWidth: 2),
                           ),
                         );
                       },
                       errorBuilder: (ctx, err, st) =>
-                          Container(color: AppColors.surface2),
+                          Container(color: colors.surfaceContainerHighest),
                     ),
             ),
           ),
@@ -46,9 +47,9 @@ class MovieCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textMain,
-                  fontWeight: FontWeight.w500,
-                ),
+              color: colors.onSurface,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           Row(
             children: [
