@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Bottom nav ที่ใช้ร่วมกันทุกหน้าฝั่งลูกค้า (Home / ตั๋วของฉัน / โปรไฟล์)
-/// รับ currentIndex + onTap จากภายนอก เพื่อให้แต่ละหน้าคุม navigation เอง
 class AppBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;

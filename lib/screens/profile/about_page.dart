@@ -25,17 +25,17 @@ class AboutPage extends StatelessWidget {
         const _MemberCard(
           icon: Icons.palette_outlined,
           title: 'คนที่ 1 • UX/UI และข้อมูลภาพยนตร์',
-          detail: 'Home, รายการหนัง, รายละเอียดหนัง, โปรโมชัน และ Profile',
+          detail: '671652021 จรรยวรรธน์ ตั้งเพิ่มพูน\nHome, รายการหนัง, รายละเอียดหนัง, โปรโมชัน และ Profile',
         ),
         const _MemberCard(
           icon: Icons.confirmation_number_outlined,
           title: 'คนที่ 2 • Booking และ Admin Frontend',
-          detail: 'เลือกรอบ ที่นั่ง อาหาร สรุปการจอง Payment UI ตั๋ว และ Admin',
+          detail: '6721652714 สมิตานันท์ ชัยธนากิจเจริญ\nเลือกรอบ ที่นั่ง อาหาร สรุปการจอง Payment UI ตั๋ว และ Admin',
         ),
         const _MemberCard(
           icon: Icons.storage_outlined,
           title: 'คนที่ 3 • Backend และ Database',
-          detail: 'API, Login/Auth, CRUD, ระบบ Booking และ Docker',
+          detail: '6721652838 อภิสิทธิ์ ทัศนวงค์วรา\nAPI, Login/Auth, CRUD, ระบบ Booking และระบบ Backend',
         ),
         const SizedBox(height: 20),
         const Text(

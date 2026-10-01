@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "681095925789",
+    "project_id": "reverie-cineplex",
+    "storage_bucket": "reverie-cineplex.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:681095925789:android:5acbbf3dcd2d131a8cf6f4",
+        "android_client_info": {
+          "package_name": "com.example.reverie_cineplex"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbTAfp70E76WDu7ZRPey3SMYyksj4bD_I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

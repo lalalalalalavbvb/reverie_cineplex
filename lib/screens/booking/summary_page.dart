@@ -3,7 +3,7 @@ part of 'booking_flow.dart';
 extension _SummaryPage on _BookingFlowState {
   List<Widget> summary() => [
     banner(),
-    pad(heading(_branches[branch])),
+    pad(heading(selectedCinema)),
     pad(pair(date, time)),
     const Divider(indent: 16, endIndent: 16),
     pad(heading('ชำระเงิน')),
@@ -19,11 +19,11 @@ extension _SummaryPage on _BookingFlowState {
     pad(pair('จำนวน', '${seats.length}')),
     pad(pair('ยอดชำระตั๋ว', '$ticketTotal บาท')),
     for (final e in quantities.entries)
-      if (e.value > 0)
+      if (e.value > 0 && foodById(e.key) != null)
         pad(
           pair(
-            '${_BookingFlowState.products[e.key]} × ${e.value}',
-            '${_BookingFlowState.prices[e.key] * e.value} บาท',
+            '${foodById(e.key)!.name} × ${e.value}',
+            '${foodById(e.key)!.price * e.value} บาท',
           ),
         ),
     const Divider(indent: 16, endIndent: 16),

@@ -3,7 +3,7 @@ part of 'booking_flow.dart';
 extension _SeatPage on _BookingFlowState {
   List<Widget> seatPage() => [
     banner(),
-    pad(heading(_branches[branch])),
+    pad(heading(selectedCinema)),
     pad(const Text('Theatre 1  ◖)) TH  ▣ EN\n\nG    2D')),
     pad(heading(date)),
     pad(
@@ -61,7 +61,8 @@ extension _SeatPage on _BookingFlowState {
                               selected: selected,
                               label: 'ที่นั่ง $id${occupied ? ' จองแล้ว' : ''}',
                               child: Tooltip(
-                                message: '$id • ${r >= 7 ? 180 : 160} บาท',
+                                message:
+                                    '$id • ${selectedLegacyShowtime && r >= 7 ? 180 : showtimePrice} บาท',
                                 child: InkWell(
                                   key: ValueKey('seat-$id'),
                                   onTap: occupied
@@ -107,8 +108,11 @@ extension _SeatPage on _BookingFlowState {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          seatLegend('Normal', 160, const Color(0xFFB42417)),
-          seatLegend('Honeymoon', 180, const Color(0xFF69359B)),
+          if (selectedLegacyShowtime) ...[
+            seatLegend('Normal', 160, const Color(0xFFB42417)),
+            seatLegend('Honeymoon', 180, const Color(0xFF69359B)),
+          ] else
+            seatLegend('Ticket', showtimePrice, const Color(0xFFB42417)),
         ],
       ),
     ),

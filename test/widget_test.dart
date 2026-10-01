@@ -11,7 +11,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
-      MaterialApp(theme: bookingTheme(), home: const BookingFlow()),
+      MaterialApp(theme: bookingTheme(), home: BookingFlow(isLoggedIn: () => true)),
     );
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(

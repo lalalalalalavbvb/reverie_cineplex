@@ -1,0 +1,25 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "reverie-cineplex",
+          "appId": "1:681095925789:android:5acbbf3dcd2d131a8cf6f4",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "reverie-cineplex",
+          "configurations": {
+            "android": "1:681095925789:android:5acbbf3dcd2d131a8cf6f4",
+            "ios": "1:681095925789:ios:4ccbf9517ce078608cf6f4",
+            "macos": "1:681095925789:ios:4ccbf9517ce078608cf6f4",
+            "web": "1:681095925789:web:f1f5596bdf803a368cf6f4",
+            "windows": "1:681095925789:web:54bb20d27e0119c58cf6f4"
+          }
+        }
+      }
+    }
+  }
+}

@@ -107,16 +107,9 @@ extension _QrPaymentPage on _BookingFlowState {
     ),
     pad(
       const Text(
-        'ยังไม่เชื่อมต่อผู้ให้บริการชำระเงิน\nQR นี้ใช้ชำระเงินจริงไม่ได้',
+        'QR Code นี้เป็นการจำลองเท่านั้น',
         textAlign: TextAlign.center,
         style: TextStyle(color: Colors.grey),
-      ),
-    ),
-    pad(
-      OutlinedButton.icon(
-        onPressed: previewTicket,
-        icon: const Icon(Icons.confirmation_number_outlined),
-        label: const Text('ดูตั๋วตัวอย่าง'),
       ),
     ),
     if (seconds == 0)

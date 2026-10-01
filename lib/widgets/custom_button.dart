@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 
-/// ปุ่มหลักที่ใช้ซ้ำทุกหน้า (จองตั๋ว, ต่อไป, ยืนยัน ฯลฯ)
 class CustomButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -46,7 +45,6 @@ class CustomButton extends StatelessWidget {
   }
 }
 
-/// ชิปกลมๆ ใช้กับ genre, สถานะ ฯลฯ
 class AppChip extends StatelessWidget {
   final String label;
   final bool active;

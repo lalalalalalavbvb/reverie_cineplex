@@ -6,7 +6,6 @@ import '../../widgets/custom_button.dart';
 import '../../models/booking_model.dart';
 import '../booking/booking_flow.dart';
 
-/// Movie details hand the selected movie to the booking flow.
 class MovieDetailScreen extends StatefulWidget {
   final int movieId;
   const MovieDetailScreen({

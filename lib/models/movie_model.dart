@@ -1,5 +1,3 @@
-/// โมเดลหนัง แปลงมาจาก response ของ TMDB API
-/// อ้างอิง: https://developer.themoviedb.org/reference/movie-now-playing-list
 class MovieModel {
   final int id;
   final String title;
@@ -9,7 +7,7 @@ class MovieModel {
   final double voteAverage;
   final String releaseDate;
   final List<int> genreIds;
-  final int? runtimeMinutes; // มีเฉพาะตอนเรียก /movie/{id} (detail)
+  final int? runtimeMinutes;
 
   MovieModel({
     required this.id,
@@ -40,8 +38,6 @@ class MovieModel {
     );
   }
 
-  /// TMDB คืนมาแค่ path เช่น "/abc.jpg" ต้องต่อ base url เอง
-  /// ขนาดโปสเตอร์ที่ใช้บ่อย: w342 (การ์ด), w780 (hero/backdrop)
   String posterUrl({String size = 'w342'}) => posterPath == null
       ? ''
       : 'https://image.tmdb.org/t/p/$size$posterPath';

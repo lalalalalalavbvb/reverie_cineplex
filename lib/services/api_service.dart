@@ -2,9 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/movie_model.dart';
 
-/// เรียก TMDB API ภายนอกตามข้อกำหนดของโจทย์
-/// สมัคร API key ฟรีที่ https://www.themoviedb.org/settings/api
-/// ⚠️ ห้าม commit API key ลง GitHub ตรงๆ ให้เก็บใน --dart-define หรือไฟล์ .env ที่ไม่ push
 class ApiService {
   static const String _baseUrl = 'https://api.themoviedb.org/3';
   static const String _apiKey = String.fromEnvironment('TMDB_API_KEY');
@@ -21,7 +18,7 @@ class ApiService {
     genreIds: const [],
     runtimeMinutes: 115,
   );
-  static const String _lang = 'th-TH'; // ให้ผลลัพธ์เป็นภาษาไทยถ้ามี
+  static const String _lang = 'th-TH';
 
   Future<List<MovieModel>> getNowPlaying({int page = 1}) async {
     if (isDemo) return [demoMovie];
@@ -51,7 +48,6 @@ class ApiService {
     return MovieModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
   }
 
-  /// ดึงคีย์ตัวอย่างหนัง (YouTube) สำหรับปุ่ม "ดูตัวอย่างหนัง"
   Future<String?> getTrailerKey(int movieId) async {
     if (isDemo) return null;
     final uri = Uri.parse('$_baseUrl/movie/$movieId/videos?api_key=$_apiKey');
